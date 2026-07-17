@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>预览 · 对白在画面内部底部</title><style>:root{--bg:#23262e;--bg-2:#1f222a;--panel:#23262e;--line:#2c313b;--accent:#7c5cff;--accent-2:#13c2c2;--grad:linear-gradient(135deg,#7c5cff,#13c2c2);--text:#e8ebf2;--muted:#98a1b3;--chip:#1b2433;--sh-dark:#16181d;--sh-light:#30343f;--nm-out:6px 6px 12px var(--sh-dark),-6px -6px 12px var(--sh-light);--nm-out-sm:4px 4px 8px var(--sh-dark),-4px -4px 8px var(--sh-light);--nm-out-lg:11px 11px 24px var(--sh-dark),-11px -11px 24px var(--sh-light);--nm-in:inset 5px 5px 10px var(--sh-dark),inset -5px -5px 10px var(--sh-light);--nm-in-sm:inset 3px 3px 6px var(--sh-dark),inset -3px -3px 6px var(--sh-light);--nm-in-lg:inset 7px 7px 15px var(--sh-dark),inset -7px -7px 15px var(--sh-light);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;}
+#floatbar{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:30;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+#floatbar.show{opacity:1;pointer-events:auto;}
+#floatBtns{display:flex;flex-direction:column;gap:10px;}
+#floatBtns button{background:var(--bg);color:var(--text);border:none;border-radius:12px;padding:10px 14px;font-size:13px;cursor:pointer;box-shadow:var(--nm-out-sm);transition:.15s;white-space:nowrap;}
+#floatBtns button:hover{box-shadow:var(--nm-out);color:#fff;}
+#floatBtns button:active{box-shadow:var(--nm-in-sm);}
+#stage{position:relative;flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:20px;padding:28px 24px;background:var(--bg);}
+#center{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;}
+.media{position:relative;width:min(960px,90vw);aspect-ratio:16/9;background:var(--bg-2);box-shadow:var(--nm-in-lg);border:none;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.media-box{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.media-box img,.media-box video{width:100%;height:100%;object-fit:contain;display:block;}
+.chars{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.char{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);height:50%;max-width:62%;width:auto;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5));}
+.media .ph{color:var(--muted);font-size:14px;}
+.ad-row{width:min(1200px,96vw);display:flex;gap:14px;flex-wrap:wrap;justify-content:center;flex:0 0 auto;}
+.ad-banner{display:none;position:relative;flex:1 1 0;min-width:280px;height:64px;border-radius:10px;overflow:hidden;text-decoration:none;background:linear-gradient(90deg,#8a6bff,#22d3ee);}
+.ad-banner.show{display:block;}
+.ad-banner img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1;}
+.ad-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;padding:0 14px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:0;}
+.dock{width:min(860px,92vw);display:flex;flex-direction:column;align-items:center;gap:12px;padding:0;}
+.hud{position:absolute;left:10px;top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;z-index:5;max-width:90%;}
+.chip{background:var(--bg);box-shadow:var(--nm-in-sm);border:none;border-radius:999px;padding:5px 12px;font-size:13px;display:flex;gap:6px;align-items:center;}
+.chip .ck{color:var(--muted);} .chip .cv{color:var(--accent-2);font-weight:700;}
+.caption{position:absolute;left:0;right:0;bottom:0;z-index:6;background:transparent;border:none;text-align:center;padding:18px 16px 20px;color:var(--text);text-shadow:0 1px 6px rgba(0,0,0,.65);}
+.speaker{color:var(--accent);font-weight:700;font-size:15px;margin-bottom:8px;}
+.text{font-size:17px;line-height:1.75;white-space:pre-wrap;}
+.choices{width:min(860px,92vw);display:flex;flex-direction:column;align-items:center;gap:10px;}
+.choice{width:100%;background:var(--bg);box-shadow:var(--nm-out-sm);border:none;border-radius:12px;padding:14px 18px;color:var(--text);font-size:15px;text-align:center;cursor:pointer;transition:.15s;}
+.choice:hover{box-shadow:var(--nm-out);color:#fff;}
+.choice:active{box-shadow:var(--nm-in-sm);}
+.end{width:100%;text-align:center;color:var(--muted);font-size:16px;padding:14px;letter-spacing:2px;}
+.audio{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.vid-ctl{display:flex;justify-content:center;}
+.vid-ctl.hidden{display:none;}
+.vid-replay{background:var(--bg);box-shadow:var(--nm-out-sm);border:none;border-radius:10px;padding:10px 18px;color:var(--text);font-size:14px;cursor:pointer;transition:.15s;}
+.vid-replay:hover{box-shadow:var(--nm-out);}
+.audio.hidden{display:none;}
+.aud-btn{background:var(--bg);box-shadow:var(--nm-out-sm);border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:var(--text);font-size:13px;transition:.15s;}
+.aud-btn:hover{box-shadow:var(--nm-out);color:#fff;}
+.aud-label{color:var(--muted);font-size:13px;}
+.ending{position:fixed;inset:0;background:rgba(6,9,14,.93);display:flex;align-items:center;justify-content:center;z-index:50;}
+.ending.hidden{display:none;}
+.end-card{text-align:center;background:var(--bg);box-shadow:var(--nm-out-lg);border:none;border-radius:20px;padding:40px 56px;}
+.end-emoji{font-size:46px;margin-bottom:8px;}
+.end-title{font-size:22px;font-weight:700;letter-spacing:4px;margin-bottom:8px;}
+.end-sub{color:var(--muted);margin-bottom:22px;}
+.big-btn{background:var(--grad);color:#fff;border:none;border-radius:10px;padding:12px 26px;font-size:15px;cursor:pointer;}
+.big-btn:hover{filter:brightness(1.1);}
+.start-screen{display:none;}
+@media(max-width:560px){#floatbar{right:8px;top:auto;bottom:14px;transform:none;flex-direction:row;}#floatBtns{flex-direction:row;}#floatBtns button{padding:8px 11px;font-size:12px;}.caption,.media,.choices{width:100%;}}
+#floatbar{opacity:1;pointer-events:auto;}</style></head><body><div id="stage">
+  <div id="adRow" class="ad-row">
+    <a class="ad-banner" data-ad="0" target="_blank" rel="noopener noreferrer"></a>
+    <a class="ad-banner" data-ad="1" target="_blank" rel="noopener noreferrer"></a>
+  </div>
+  <div id="center">
+    <div id="media" class="media">
+      <div id="mediaBox" class="media-box"><img src="https://picsum.photos/seed/movie/960/540" alt=""></div>
+      <div id="chars" class="chars"></div>
+      <div id="hud" class="hud"></div>
+      <div id="caption" class="caption">
+        <div id="speaker" class="speaker">旁白</div>
+        <div id="text" class="text">这是叠在播放画面内部底部的对白字幕，背景透明。</div>
+      </div>
+    </div>
+    <div class="dock">
+      <div id="audioBar" class="audio hidden">
+        <button id="audToggle" class="aud-btn">&#9654; 播放旁白</button>
+        <button id="audReplay" class="aud-btn">&#8635; 重听</button>
+        <span class="aud-label">&#128266; 该场景配有旁白</span>
+      </div>
+      <div id="vidCtl" class="vid-ctl hidden"><button id="vidReplay" class="vid-replay">&#8635; 重播视频</button></div>
+      <div id="choices" class="choices"><button class="choice">继续 →</button></div>
+    </div>
+    <audio id="aud" preload="auto"></audio>
+  </div>
+</div>
+<div id="floatbar">
+  <div id="floatBtns">
+    <button id="btnBack">&larr; 返回</button>
+    <button id="btnRestart">&#8635; 重玩</button>
+    <button id="btnExit">&#10005; 结束</button>
+  </div>
+</div>
+<div id="ending" class="ending hidden">
+  <div class="end-card">
+    <div class="end-emoji">&#127916;</div>
+    <div class="end-title">—— 剧终 ——</div>
+    <div class="end-sub" id="endSub"></div>
+    <button id="endRestart" class="big-btn">&#8635; 重新开始</button>
+  </div>
+</div></body></html>
